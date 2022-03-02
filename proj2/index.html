@@ -1,7 +1,381 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 2 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+  <style>
+    body {
+      padding: 100px;
+      width: 1000px;
+      margin: auto;
+      text-align: left;
+      font-weight: 300;
+      font-family: 'Open Sans', sans-serif;
+      color: #121212;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: 'Source Sans Pro', sans-serif;
+    }
+  </style>
+  <title>CS 184 Mesh Editor</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+
+
+<body>
+
+  <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2022</h1>
+  <h1 align="middle">Project 2: Mesh Editor</h1>
+  <h2 align="middle">HENRY LA, KEVIN PONCE</h2>
+
+  <br><br>
+
+  <div>
+
+    <h2 align="middle">Overview</h2>
+    <p>
+        In this project, we explored how to model geometric objects using bezier curves, traverse meshes using half edges, and smooth out meshes with upsampling. Using Casteljau’s algorithm, we are able to calculate bezier curves that are used for creating rounded objects in 3D modeling. Using the half edge data structure, we learned how to traverse a mesh and perform basic mesh operations as flipping and splitting. Finally, we learned how to upsample our mesh using our mesh operations in order to create smoother 3D objects.
+    </p>
+    <p>
+        This project was both a fun and rewarding experience. It was very interesting to see how the functions we implemented using our knowledge from lectures affected the appearance of our mesh, and it was fun to play around with the GUI using these features that we implemented ourselves. Part 6 was especially cool as we were able to put everything together to ultimately affect the shape of our objects.
+    </p>
+
+    <h2 align="middle">Section I: Bezier Curves and Surfaces</h2>
+
+    <h3 align="middle">Part 1: Bezier curves with 1D de Casteljau subdivision</h3>
+
+    <p>
+        Casteljau’s algorithm is a method of formulating Bezier curves by interpolating between points along a space, given values of t. These values of t represent the proportion along a line that a newly interpolated point will lie. Bezier curves are used in many graphic applications such as Adobe Illustrator in order to create smooth curves and shapes for fonts, animations, and 3D modeling. We implemented Casteljau’s algorithm by iterating through the points we pass into the evaluate step function, and interpolating between every pair of successive points using our value of t. We then add these new interpolated points to an arraylist of 2D vectors and return it. The pictures below show each step of Casteljau’s algorithm down to the final evaluated point. This final point is what will actually lie on the bezier curve.
+    </p>
+
+
+
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="proj2images/T1_1.png" align="middle" width="400px" />
+            <figcaption align="middle">First iteration</figcaption>
+          </td>
+          <td>
+            <img src="proj2images/T1_2.png" align="middle" width="400px" />
+            <figcaption align="middle">Second iteration</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="proj2images/T1_3.png" align="middle" width="400px" />
+            <figcaption align="middle">Third iteration</figcaption>
+          </td>
+          <td>
+            <img src="proj2images/T1_4.png" align="middle" width="400px" />
+            <figcaption align="middle">Fourth iteration</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="proj2images/T1_5.png" align="middle" width="400px" />
+            <figcaption align="middle">Fifth iteration</figcaption>
+          </td>
+          <td>
+            <img src="proj2images/T1_6.png" align="middle" width="400px" />
+            <figcaption align="middle">The red point lies on the bezier curve.</figcaption>
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="proj2images/T1_7.png" align="middle" width="400px" />
+            <figcaption align="middle">Bezier curve with different anchor points.</figcaption>
+          </td>
+          <td>
+            <img src="proj2images/T1_8.png" align="middle" width="400px" />
+            <figcaption align="middle">Same curve but at a different t value.</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <h3 align="middle">Part 2: Bezier surfaces with separable 1D de Casteljau subdivision</h3>
+    <p>
+        Casteljau’s algorithm extends to Bezier surfaces by evaluating what are known as Bezier patches, which are parametrized 2D surfaces in terms of u and v. These patches are computed by taking a list of 3D points and computing a set of Bezier curves along the u-axis. The final interpolated point along these Bezier curves in the u-axis then serve as the control points for evaluating Bezier curves along the v-axis. The result is a Bezier surface that has been interpolated in two dimensions, as opposed to one.
+    </p>
+    <p>
+        Casteljau’s algorithm extends to Bezier surfaces by evaluating what are known as Bezier patches, which are parametrized 2D surfaces in terms of u and v. These patches are computed by taking a list of 3D points and computing a set of Bezier curves along the u-axis. The final interpolated point along these Bezier curves in the u-axis then serve as the control points for evaluating Bezier curves along the v-axis. The result is a Bezier surface that has been interpolated in two dimensions, as opposed to one.
+    </p>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="proj2images/T2_teapot.png" align="middle" width="400px" />
+            <figcaption align="middle">teapot.bez made with Bezier surfaces.</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <h2 align="middle">Section II: Sampling</h2>
+
+    <h3 align="middle">Part 3: Average normals for half-edge meshes</h3>
+    <p>
+        The way that we decided to implement area-weighted vertex normals was by taking our starting vertex and getting the rest of the vertex positions by iterating next twice. Then we subtract the original vertex’s position from each of the other vertex positions to get 2 distance vectors and we take the cross of these 2 vectors combined. After taking the cross, we add our result to the sum of all the other areas’ crosses. We then repeat this process until we come back to our starting halfedge, upon which we then normalize the summed vector of all the sides using .normalize(). Finally, we return our computed unit normal vector.
+    </p>
+
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="proj2images/T3_teapotGrid.png" align="middle" width="400px" />
+            <figcaption align="middle">No area weighted vertex normal.</figcaption>
+          </td>
+          <td>
+            <img src="proj2images/T3_teapotSmooth.png" align="middle" width="400px" />
+            <figcaption align="middle">With area weighted vertex normal.</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <p>
+        We can see from the second image that the colors look a lot smoother and transition more naturally leaving less jaggies on the image in terms of coloring than when we don’t apply the weighted normals
+    </p>
+
+
+    <h3 align="middle">Part 4: Half-edge flip</h3>
+    <p>
+        This part was for the most part straight forward. We first check to see if the edge selected is a boundary edge and if it is, we return the original edge and do nothing. Otherwise, we continue with our process. After we check to see if we are on a boundary we need to get all the elements of every half edge including edges, twins, vertices, and faces. We then reassign their components according to which pointers have changed or could have potentially changed. One change that we made is that both of the vertices originally connected to the edge we flipped need to be reassigned since they could have referenced one of the flipped half edges as their .halfedge() component. All of the half edges are now pointing to different half edges and need to be updated. One thing that was slightly confusing in our debugging process was the faces of the teapot. Sometimes a face would disappear after flipping, leaving an exposed hole in our teapot. After comparing our implementations between each other,  we discovered the error to be a mis-assignment of pointers.
+    </p>
+
+    <div align="middle">
+    <table style="width=100%">
+    <tr>
+        <td>
+        <img src="proj2images/T4_teapot.png" align="middle" width="400px" />
+        <figcaption align="middle">Before flipping.</figcaption>
+        </td>
+        <td>
+        <img src="proj2images/T4_teapotFlipped.png" align="middle" width="400px" />
+        <figcaption align="middle">After flipping.</figcaption>
+        </td>
+    </tr>
+    </table>
+    </div>
+
+    <p>
+        One thing that was particularly difficult to do was keep track of all the edges and vertices as I miss interpreted 2 vertices and ended up having a halfedge that was misplaced after flipping causing some interesting bugs.
+    </p>
+
+
+    <h3 align="middle">Part 5: Half-edge split</h3>
+    <p>
+        We implemented the edge split operation by first retrieving all the half edges, vertices, edges, and faces that will or could be affected by our edge split operation. We did this by traversing through the components of each of our half edges, just like how we did in part 4. We then calculated the midpoint of our edge to split by taking its vertices on either end and averaging out their x, y, and z coordinates. We then created a new vertex with our computed midpoint as its position. This would be the vertex that we would eventually return.
+    </p>
+
+    <p>
+        After creating our new vertex, we also allocated memory for the new half edges, faces, and edges that will be created after our split operation, and assigned their pointers to the appropriate components on the mesh. We also had to reassign old elements on the mesh to reflect what they should look like after the split operation.
+    </p>
+
+    <p>
+        One problem that we encountered while implementing splitEdge was that sometimes the edges we splitted would get rid of the surface of our mesh, which would result in a hole. Other times, the edge would just disappear entirely, and the new edge that formed would appear elsewhere within our mesh. Similar to part four, we resolved this problem by having both partners implement splitEdge separately using the same diagram, and then comparing our implementations together. Through this process, we found discrepancies between our assignment of our halfedge pointers, which upon resolving, solved both of these issues.
+    </p>
+
+    <div align="middle">
+    <table style="width=100%">
+    <tr>
+        <td>
+        <img src="proj2images/T5_noSplit.png" align="middle" width="400px" />
+        <figcaption align="middle">Initial teapot.</figcaption>
+        </td>
+        <td>
+        <img src="proj2images/T5_someSplits.png" align="middle" width="400px" />
+        <figcaption align="middle">After splitting a few edges.</figcaption>
+        </td>
+    </tr>
+    </table>
+    </div>
+
+    <div align="middle">
+            <img src="proj2images/T5_someSplitsAndFlips.png" align="middle" width="400px" />
+            <figcaption align="middle">After splitting and flipping a few edges.</figcaption>
+    </div>
+
+
+    <h3 align="middle">Part 6: Loop subdivision for mesh upsampling</h3>
+
+    <p>
+        To implement loop subdivision, we first iterated through every vertex within the mesh. For each of these vertices, we computed their new positions by taking a weighted sum of their original neighbors’ positions, as well as the vertex’s degree and initial position. We then stored this new position in the vertices’ newPosition component to apply after our splitting and flipping.
+    </p>
+
+    <p>
+        Similarly for new vertices, we computed their positions by iterating through every edge within the mesh, and storing the vertice’s position within the edges’ newPosition components. The positions of these new vertices were computed by computing a weighted sum of vertices of the two triangles an edge was a part of in our original mesh.
+    </p>
+
+    <p>
+        Afterwards, we iterated through all the edges of the mesh once more and split every edge that was a part of the old mesh, and then flipped the ones that connected an old vertex to a new one. Finally, we assigned every vertex to their new positions based on whether they were a part of the old mesh or were added during our split operations.
+    </p>
+
+    <p>
+        One bug that we experienced in our part 6 that we were unable to solve was that after two loop subdivisions, any subsequent subdivision would result in “dimples” forming in our mesh. Our debugging revealed that these dimples were forming at the original vertices of the mesh before we began upsampling, as shown below.
+    </p>
+
+    <div align="middle">
+    <table style="width=100%">
+    <tr>
+        <td>
+        <img src="proj2images/T6_teapotUpSample1.png" align="middle" width="400px" />
+        <figcaption align="middle">Teapot after one upsample.</figcaption>
+        </td>
+        <td>
+        <img src="proj2images/T6_teapotUpSample2.png" align="middle" width="400px" />
+        <figcaption align="middle">Teapot after two upsamples.</figcaption>
+        </td>
+    </tr>
+    </table>
+    </div>
+
+    <div align="middle">
+            <img src="proj2images/T6_teapotUpSample3.png" align="middle" width="400px" />
+            <figcaption align="middle">Teapot after three up samples. The original vertices in the mesh are not in their correct positions.</figcaption>
+    </div>
+
+    <p>
+        During our debugging process, we checked the following potential causes to this error: <br>
+        1) Improper assignment of pointers in our edge split and flip functions. <br>
+        2) Integer division in our calculations for new positions of vertices. <br>
+        3) Failure to update the isNew components of our edges and vertices at the end of our upsample function. <br>
+    </p>
+
+    <p>
+        We performed the following fixes: <br>
+        1) We revisited task 4 and 5 and double checked our assignments. <br>
+        2) We casted any calculations conducted in task 6 into floats. <br>
+        3) We updated the isNew component of all the new edges and vertices after assigning the new positions. <br>
+    </p>
+
+    <p>
+        Unfortunately, even after conducting these fixes, we were still unable to prevent the dimples from forming. We have concluded that this could be an edge case where the vertices are being reassigned values within our functions. Despite this discrepancy in our upsample function, however, we are still able to observe the effects of upsampling on our meshes. For example, take the cube.dae:
+    </p>
+
+    <div align="middle">
+    <table style="width=100%">
+    <tr>
+        <td>
+        <img src="proj2images/T6_cube1.png" align="middle" width="400px" />
+        <figcaption align="middle">Initial cube.</figcaption>
+        </td>
+        <td>
+        <img src="proj2images/T6_cube2.png" align="middle" width="400px" />
+        <figcaption align="middle">Cube after one upsample.</figcaption>
+        </td>
+    </tr>
+    </table>
+    </div>
+
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="proj2images/T6_cube3.png" align="middle" width="400px" />
+            <figcaption align="middle">Cube after two upsamples.</figcaption>
+          </td>
+          <td>
+            <img src="proj2images/T6_cube4.png" align="middle" width="400px" />
+            <figcaption align="middle">Cube after three upsamples.</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <p>
+        After one iteration of subdivision, the cube no longer resembles a cube. Its sharp corners are flattened out and the center of each face of the cube becomes elevated. Subsequent loop division yields a spherical object that is far from resembling a six-sided cube. Suppose instead we pre-splitted the edges of the cube before upsampling:
+    </p>
+
+    <div align="middle">
+    <table style="width=100%">
+    <tr>
+        <td>
+        <img src="proj2images/T6_cubeSplit1.png" align="middle" width="400px" />
+        <figcaption align="middle">Initial pre-splitted cube.</figcaption>
+        </td>
+        <td>
+        <img src="proj2images/T6_cubeSplit2.png" align="middle" width="400px" />
+        <figcaption align="middle">Pre-splitted cube after one upsample.</figcaption>
+        </td>
+    </tr>
+    </table>
+    </div>
+
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="proj2images/T6_cubeSplit3.png" align="middle" width="400px" />
+            <figcaption align="middle">Pre-splitted cube after two upsamples.</figcaption>
+          </td>
+          <td>
+            <img src="proj2images/T6_cubeSplit4.png" align="middle" width="400px" />
+            <figcaption align="middle">Pre-splitted cube after three upsamples.</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <p>
+        As you can see, pre-splitting the edges before upsampling yielded a mesh that was more cubic in nature. The edges and corners were still rounded out. However, the faces of each of the six sides were flat, and the overall shape strongly resembled a die. This is because splitting the edges ahead of time gave the cube six additional vertices to work with, one at the center of each face. Because these center vertices were connected to the corners, they affected the original_neighbor_position_sum part of our calculations for new positions, as well as creating more neighboring triangles to average with. This resulted in a less spherical shape. However, subsequent upsampling in this pre-sampling setup yields a spherical object once more. We can further reduce these rounding side effects of upsampling by flipping the new edges created from splitting as shown in the figures below.
+    </p>
+
+    <div align="middle">
+    <table style="width=100%">
+    <tr>
+        <td>
+        <img src="proj2images/T6_flippingAndSplittingCube.png" align="middle" width="400px" />
+        <figcaption align="middle">Initial pre-splitted + flipped cube.</figcaption>
+        </td>
+        <td>
+        <img src="proj2images/T6_cubeUpSample1.png" align="middle" width="400px" />
+        <figcaption align="middle">Pre-splitted + flipped cube after one upsample.</figcaption>
+        </td>
+    </tr>
+    </table>
+    </div>
+
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="proj2images/T6_cubeUpSample2.png" align="middle" width="400px" />
+            <figcaption align="middle">Pre-splitted + flipped cube after two upsamples.</figcaption>
+          </td>
+          <td>
+            <img src="proj2images/T6_cubeUpSample3.png" align="middle" width="400px" />
+            <figcaption align="middle">Pre-splitted + flipped cube after three upsamples.</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <p>
+        Even as we continue to upsample the cube, it still holds some resemblance to a cube. The reason for this phenomenon is that flipping after splitting reduces the overall distance between the corners of the original cube and its neighboring vertices. Notice how when we just split, each vertex of the cube connects to the center vertex of each face of the cube, while flipping afterwards results in having neighboring vertices in just the middle of adjacent edges. Because of this decrease in area to average over in our new position calculations, the cube maintains more of its original shape as we upsample.
+    </p>
+
+    <h2 align="middle">Section III: Optional Extra Credit</h2>
+    <p>If you are not participating in the optional mesh competition, don't worry about this section!</p>
+
+    <h3 align="middle">Part 7: Design your own mesh!</h3>
+
+    <p>
+        Website Link: 
+    </p>
+</body>
+
 </html>
