@@ -1,7 +1,146 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 3-2 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>  
+    div.padded {  
+      padding-top: 0px;  
+      padding-right: 100px;  
+      padding-bottom: 0.25in;  
+      padding-left: 100px;  
+    }  
+  </style> 
+<title>Henry La and Amy Tran  |  CS 184</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+<br />
+<h1 align="middle">Assignment 3: PathTracer2</h1>
+    <h2 align="middle">Henry La and Amy Tran</h2>
+    <div class="padded">
+        <h3 align="middle">Overview</h3>
+        <p>
+            In this project, we extended our work from PathTracer1 by adding rendering support for mirror and glass materials. This was done by implementing functions for finding the reflection and refraction of rays that pass through these materials, which we then used in our BSDF sampling. We also added support for a thin lens camera model, which allows us to mimic the properties of our eyes to focus on a point and blur the rest of our environment. This was accomplished by sampling a random point on our lens as the origin of our ray, and then finding the point at which our ray hits the plane of focus.
+        </p>
+        <h2 align="middle">Part 1: Mirror and Glass Materials</h2>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="imgs/spheres_0.png" />
+                        <figcaption align="middle">m = 0</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="imgs/spheres_1.png" />
+                        <figcaption align="middle">m = 1</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="imgs/spheres_2.png" />
+                        <figcaption align="middle">m = 2</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="imgs/spheres_3.png" />
+                        <figcaption align="middle">m = 3</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="imgs/spheres_4.png" />
+                        <figcaption align="middle">m = 4</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="imgs/spheres_5.png" />
+                        <figcaption align="middle">m = 5</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="imgs/spheres_100.png" />
+                        <figcaption align="middle">m = 100</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <p>
+            Starting from zero bounces, we only see the light from the source. When we allow one bounce, we can see the reflection of the light on the spheres. The light reflected by the sphere on the right is speckled since there is a probability that the light does not get reflected, and it gets refracted instead. With 2 ray bounces, we can see the reflection of light on the whole sphere, and we can see refraction given by the light source that bounces through the right sphere right back to the camera. Not many light rays do this, so it still looks mostly black. Additionally, in the reflection of the ceiling in the sphere on the left, it looks black since light needs to bounce twice to illuminate the ceiling, and it would need an additional bounce to be seen in the reflection. With 3 bounces, we can finally see more light coming through the sphere from the whole scene. We can also see light in the shadow of the right sphere which is coming from the light that is refracted by the glass sphere and hitting the ground before coming to the camera. With 4 bounces, we can also see a spot of light on the right wall which is from the light being reflected by the left sphere, then refracted by the right sphere. Five bounces gives us a similar result as 4 bounces.  With 100 bounces, there are more bright specs near the reflection of the light source in the glass sphere. I think this is because more light is refracted that way, or reflected by light that has bounced a few times before reaching the sphere.
+        </p>
+
+        <h2 align="middle">Part 1: Mirror and Glass Materials</h2>
+        <p>
+            A pin-hole camera model shoots rays out from only the center of the lens of the camera, resulting in everything within the scene to be rendered with full clarity. This means that everything is in focused within our rendering, regardless of their distance from the camera. Thin-lens camera models, on the other hand, are more akin to how cameras and our eyes work. Depending on our focus point, some objects are clear, while others are blurred. Our thin lens model determines the blurriness/clarity of a given point by uniformly sampling a point on our lens, and creating a ray from that point to our plane of focus, which is determined by -focalDistance.
+        </p>
+
+        <p>
+            The images below show a focus stack of our rendering of a dragon. All renderings are using 256 samples per pixel, 4 samples per area of light, a ray depth of 7, and an aperture of 0.28.
+        </p>
+
+        <div align="center">
+            <h3 align="middle">Focus Stack</h3>
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="imgs/part4/dragon_micro_staff_settings_0-28_4-5.png" />
+                        <figcaption align="middle">d = 4.5</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="imgs/part4/dragon_micro_staff_settings_0-28_4-7.png" />
+                        <figcaption align="middle">d = 4.7</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="imgs/part4/dragon_micro_staff_settings_0-28_4-9.png" />
+                        <figcaption align="middle">d = 4.9</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="imgs/part4/dragon_micro_staff_settings_0-28_5-1.png" />
+                        <figcaption align="middle">d = 5.1</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <p>
+            As you can see from the images above, initially, only the front of the dragon is clearly visible in our rendering. This is because the dragon’s front is positioned at the focal plane defined by our value of d (focal distance). As we increase d, we can witness how the plane moves towards the end of the dragon, causing the tail to be in focus while everything else is blurred.
+        </p>
+        <p>
+            Now we’ll  adjust the aperture size by changing our value for b in our GUI. As before, all renderings are using 256 samples per pixel, 4 samples per area of light, and a ray depth of 7. This time however, our focal distance is fixed at 4.6.
+        </p>
+        <div align="center">
+            <h3 align="middle">Different Aperture</h3>
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="imgs/part4/dragon_micro_staff_settings_0-13_4-6.png" />
+                        <figcaption align="middle">b = 0.13</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="imgs/part4/dragon_micro_staff_settings_0-33_4-6.png" />
+                        <figcaption align="middle">b = 0.33</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="imgs/part4/dragon_micro_staff_settings_0-53_4-6.png" />
+                        <figcaption align="middle">b = 0.53</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="imgs/part4/dragon_micro_staff_settings_0-73_4-6.png" />
+                        <figcaption align="middle">b = 0.73</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <p> Increasing our aperture size results in a wider range of values that we can sample from our lens. This is why as we increase our value of b (aperture size), the areas of our rendering that don’t lie on our focus plane become blurrier.</p>
+        <br />
+        <p> <b>Github Pages Link:</b> https://cal-cs184-student.github.io/sp22-project-webpages-Zenuriken/proj3-2/index.html</p>
+    </div>
+</body>
 </html>
+
+
+
+
