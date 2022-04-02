@@ -23,6 +23,9 @@
             In this project, we extended our work from PathTracer1 by adding rendering support for mirror and glass materials. This was done by implementing functions for finding the reflection and refraction of rays that pass through these materials, which we then used in our BSDF sampling. We also added support for a thin lens camera model, which allows us to mimic the properties of our eyes to focus on a point and blur the rest of our environment. This was accomplished by sampling a random point on our lens as the origin of our ray, and then finding the point at which our ray hits the plane of focus.
         </p>
         <h2 align="middle">Part 1: Mirror and Glass Materials</h2>
+        <p>
+            For this part of the project, we used equations that we learned in class to calculate which way light rays would reflect and refract based on different materials. For glass, we needed to handle a special case where there is a random chance that the light ray will reflect or refract. We used Schlick's approximation to calculate the probability that the light ray will be reflected.
+        </p>
         <div align="center">
             <table style="width=100%">
                 <tr>
@@ -70,6 +73,9 @@
         <h2 align="middle">Part 1: Mirror and Glass Materials</h2>
         <p>
             A pin-hole camera model shoots rays out from only the center of the lens of the camera, resulting in everything within the scene to be rendered with full clarity. This means that everything is in focused within our rendering, regardless of their distance from the camera. Thin-lens camera models, on the other hand, are more akin to how cameras and our eyes work. Depending on our focus point, some objects are clear, while others are blurred. Our thin lens model determines the blurriness/clarity of a given point by uniformly sampling a point on our lens, and creating a ray from that point to our plane of focus, which is determined by -focalDistance.
+        </p>
+        <p>
+            Our implementation of the thin lens model first retrieves the direction of our ray in camera space from our pin-hole model. We then calculate the time of the intersection between this ray and our plane of focus by using the formula for ray-intersection with axis-aligned planes, with our axis of interest being z. Using our value of t, we calculate our intersection point using the ray formula o + td, and we’ll call this point our pFocus. Next, we uniformly sample a point along our lens and set that as the origin of our ray (pLens). We then subtract pLens from pFocus and set the difference as the direction for our ray. Finally, we normalize, convert our ray components to world space, add our camera’s world position to our ray’s origin, and then return our ray.
         </p>
 
         <p>
